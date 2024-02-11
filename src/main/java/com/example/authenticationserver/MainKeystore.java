@@ -32,7 +32,8 @@ public class MainKeystore {
         PublicKey publicKey = keyPair.getPublic();
 
         X509Certificate cert = createSelfSignedCertificate("server", publicKey, privateKey);
-        saveCertificateAndPrivateKeyToKeystore(cert, privateKey, "server", "server");
+        saveCertificateAndPrivateKeyToKeystore(cert, privateKey, "server", "1234");
+        saveCertificateAndPrivateKeyToKeystore2(cert, privateKey    , "server", "1234");
     }
 
     private static X509Certificate createSelfSignedCertificate(String username, PublicKey publicKey, PrivateKey privateKey) throws Exception {
@@ -60,6 +61,15 @@ public class MainKeystore {
         //TODO revisar que la password esta hasheada
         ks.setKeyEntry(username, privateKey, userPassword.toCharArray(), new Certificate[]{cert});
         FileOutputStream fos = new FileOutputStream("keystore.jks");
+        ks.store(fos, "1234".toCharArray());
+        fos.close();
+    }
+    private static void saveCertificateAndPrivateKeyToKeystore2(X509Certificate cert, PrivateKey privateKey, String username, String userPassword) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        KeyStore ks = KeyStore.getInstance("PKCS12");
+        ks.load(null, null);
+        ks.setCertificateEntry(username, cert);
+        //TODO revisar que la password esta hasheada
+        FileOutputStream fos = new FileOutputStream("C:\\Users\\pabse\\IdeaProjects\\ServerGraphql\\keystore.jks");
         ks.store(fos, "1234".toCharArray());
         fos.close();
     }
