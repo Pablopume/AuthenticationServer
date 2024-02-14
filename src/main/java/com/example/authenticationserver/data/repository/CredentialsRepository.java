@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CredentialsRepository  extends ListCrudRepository<CredentialsEntity, Long> {
-    CredentialsEntity findByUsername(String username);
+CredentialsEntity findByUsername(String username);
 
 }

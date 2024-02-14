@@ -1,7 +1,6 @@
 package com.example.authenticationserver.domain.servicios;
 
 
-import com.example.authenticationserver.data.modelo.CredentialsEntity;
 import com.example.authenticationserver.data.repository.CredentialsRepository;
 import com.example.authenticationserver.domain.modelo.Credentials;
 import com.example.authenticationserver.domain.modelo.LoginToken;
@@ -13,6 +12,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,18 +29,20 @@ public class ServiciosCredentials {
     private final CredentialsRepository credentialsRepository;
     private final PasswordEncoder passwordEncoder;
     private final KeyProvider keyProvider;
+    private final AuthenticationManager authenticationManager;
 
-    public ServiciosCredentials(CredentialsMapper credentialsMapper, CredentialsRepository credentialsRepository, PasswordEncoder passwordEncoder, KeyProvider keyProvider) {
+    public ServiciosCredentials(CredentialsMapper credentialsMapper, CredentialsRepository credentialsRepository, PasswordEncoder passwordEncoder, KeyProvider keyProvider, AuthenticationManager authenticationManager) {
         this.credentialsMapper = credentialsMapper;
 
         this.credentialsRepository = credentialsRepository;
         this.passwordEncoder = passwordEncoder;
 
         this.keyProvider = keyProvider;
+        this.authenticationManager = authenticationManager;
     }
 
 
-    public Credentials addCredentials(Credentials credentials) {
+    public Credentials register(Credentials credentials) {
 
         credentials.setPassword(passwordEncoder.encode(credentials.getPassword()));
         credentialsRepository.save(credentialsMapper.toCredentialsEntity(credentials));
@@ -48,11 +53,14 @@ public class ServiciosCredentials {
 
     // http://localhost:8080/PSP_JWT-1.0-SNAPSHOT/api/credentials/login?user=pabsermat@gmail.com&password=1234565675785858566548648645858548548458
     public LoginToken doLogin(String user, String password) {
-        Credentials credentials = credentialsMapper.toCredentials(credentialsRepository.findByUsername(user));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user, password));
 
-        if (credentials.getPassword() != null && (passwordEncoder.matches(password, credentials.getPassword()))) {
-            String accessToken = generateToken(credentials.getUsername());
-            String refreshToken = generateRefreshToken(credentials.getUsername());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        if(authentication.isAuthenticated()) {
+            String accessToken = generateToken(user);
+            String refreshToken = generateRefreshToken(user);
             return new LoginToken(accessToken, refreshToken);
 
 
@@ -62,12 +70,12 @@ public class ServiciosCredentials {
         }
     }
 
-    private boolean validateToken(String accessToken) {
+    private boolean validateToken(String refreshtoken) {
         try {
             Jws<Claims> claimsJws = Jwts.parserBuilder()
                     .setSigningKey(keyProvider.obtenerKeyPairUsuario("server").getPublic())
                     .build()
-                    .parseClaimsJws(accessToken);
+                    .parseClaimsJws(refreshtoken);
 
             long expirationMillis = claimsJws.getBody().getExpiration().getTime();
             return System.currentTimeMillis() < expirationMillis;
