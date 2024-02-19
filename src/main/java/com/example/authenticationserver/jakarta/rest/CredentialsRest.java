@@ -5,7 +5,6 @@ import com.example.authenticationserver.domain.modelo.Credentials;
 import com.example.authenticationserver.domain.modelo.LoginToken;
 import com.example.authenticationserver.domain.servicios.ServiciosCredentials;
 import com.example.authenticationserver.jakarta.RestConstantes;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,6 @@ public class CredentialsRest {
 
     @GetMapping(RestConstantes.LOGIN)
     public LoginToken getLogin(@RequestParam(RestConstantes.USERMINUSC) String user, @RequestParam(RestConstantes.PASSWORD) String password) {
-
         return serviciosCredentials.doLogin(user, password);
     }
 
