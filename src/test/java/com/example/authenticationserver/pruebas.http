@@ -1,0 +1,24 @@
+###login
+POST http://localhost:8764/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+> {%
+    client.global.set("token", response.body.accessToken);
+%}
+
+###get all clientes
+GRAPHQL {{host}}
+Authorization: Bearer {{token}}
+query GetCliente {
+    getClientes {
+        id
+        nombre
+        email
+    }
+}

@@ -16,16 +16,30 @@ import org.springframework.security.web.SecurityFilterChain;
         prePostEnabled = true,
         jsr250Enabled = true
 )
+
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+    private static final String[] AUTH_WHITE_LIST = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/v2/api-docs/**",
+            "/swagger-resources/**"
+    };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+    return     http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeRequests().anyRequest().permitAll();
+                .authorizeHttpRequests(authorizeRequests ->
+                        authorizeRequests
+                                .requestMatchers("/login").permitAll()
+                                .requestMatchers("/register").permitAll()
+                                .requestMatchers("/getAccessToken").permitAll()
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers(AUTH_WHITE_LIST).permitAll()
+                                .anyRequest().authenticated()
+                ).build();
 
-        return http.build();
+
     }
 
 
