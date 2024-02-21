@@ -92,7 +92,7 @@ public class ServiciosCredentials {
                 .setSubject(credentials.getUsername())
                 .claim("rol", credentials.getRol())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 300000))  // 300 seconds
+                .setExpiration(new Date(System.currentTimeMillis() + 30000))  // 300 seconds 300000
                 .signWith(keyProvider.obtenerKeyPairUsuario("server").getPrivate())
                 .compact();
 
