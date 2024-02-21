@@ -32,8 +32,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/login").permitAll()
-                                .requestMatchers("/register").permitAll()
-                                .requestMatchers("/getAccessToken").permitAll()
+                                .requestMatchers("/refreshToken").permitAll()
+                                .requestMatchers("/credentials").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers(AUTH_WHITE_LIST).permitAll()
                                 .anyRequest().authenticated()
