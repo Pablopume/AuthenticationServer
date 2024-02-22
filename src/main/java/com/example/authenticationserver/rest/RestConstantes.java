@@ -1,4 +1,4 @@
-package com.example.authenticationserver.jakarta;
+package com.example.authenticationserver.rest;
 
 public class RestConstantes {
     public static final String CUSTOMER = "/customer";

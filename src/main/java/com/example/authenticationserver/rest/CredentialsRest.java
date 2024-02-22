@@ -1,10 +1,9 @@
-package com.example.authenticationserver.jakarta.rest;
+package com.example.authenticationserver.rest;
 
 
-import com.example.authenticationserver.domain.modelo.Credentials;
+import com.example.authenticationserver.domain.modelo.CredentialsRegister;
 import com.example.authenticationserver.domain.modelo.LoginToken;
 import com.example.authenticationserver.domain.servicios.ServiciosCredentials;
-import com.example.authenticationserver.jakarta.RestConstantes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +16,7 @@ public class CredentialsRest {
 
 
     @PostMapping(RestConstantes.CREDENTIALS)
-    public Credentials register(@RequestBody Credentials credentials) {
+    public Boolean register(@RequestBody CredentialsRegister credentials) {
         return serviciosCredentials.register(credentials);
     }
 

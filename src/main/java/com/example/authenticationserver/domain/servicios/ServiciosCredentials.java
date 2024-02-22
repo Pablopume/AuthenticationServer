@@ -1,11 +1,12 @@
 package com.example.authenticationserver.domain.servicios;
 
 
+import com.example.authenticationserver.data.modelo.CredentialsEntity;
 import com.example.authenticationserver.data.repository.CredentialsRepository;
 import com.example.authenticationserver.domain.modelo.Credentials;
+import com.example.authenticationserver.domain.modelo.CredentialsRegister;
 import com.example.authenticationserver.domain.modelo.LoginToken;
 import com.example.authenticationserver.domain.modelo.exceptions.Exception401;
-import com.example.authenticationserver.domain.modelo.exceptions.ExceptionLogin;
 import com.example.authenticationserver.domain.modelo.mappers.CredentialsMapper;
 import com.example.authenticationserver.security.KeyProvider;
 import io.jsonwebtoken.Claims;
@@ -42,16 +43,16 @@ public class ServiciosCredentials {
     }
 
 
-    public Credentials register(Credentials credentials) {
-
+    public Boolean register(CredentialsRegister credentials) {
         credentials.setPassword(passwordEncoder.encode(credentials.getPassword()));
-        credentialsRepository.save(credentialsMapper.toCredentialsEntity(credentials));
-
-        return credentials;
+        CredentialsEntity credentialsEntity =credentialsMapper.toCredentialsEntity(credentials);
+        credentialsEntity.setRol("USER");
+        credentialsRepository.save(credentialsEntity);
+        return true;
     }
 
 
-    // http://localhost:8080/PSP_JWT-1.0-SNAPSHOT/api/credentials/login?user=pabsermat@gmail.com&password=1234565675785858566548648645858548548458
+
     public LoginToken doLogin(String user, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user, password));
@@ -62,11 +63,10 @@ public class ServiciosCredentials {
             String accessToken = generateToken(user);
             String refreshToken = generateRefreshToken(user);
             return new LoginToken(accessToken, refreshToken);
-
-
         }
+        //nunca va a llegar aquí ya que si no se autentica lanza la excepcion de hibernate, por eso devuelvo un null
         else {
-            throw new ExceptionLogin("Usuario o contraseña incorrectos");
+            return null;
         }
     }
 
@@ -92,7 +92,7 @@ public class ServiciosCredentials {
                 .setSubject(credentials.getUsername())
                 .claim("rol", credentials.getRol())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 30000))  // 300 seconds 300000
+                .setExpiration(new Date(System.currentTimeMillis() + 300000))  // 300 seconds 300000
                 .signWith(keyProvider.obtenerKeyPairUsuario("server").getPrivate())
                 .compact();
 
@@ -102,7 +102,6 @@ public class ServiciosCredentials {
         Credentials credentials = credentialsMapper.toCredentials(credentialsRepository.findByUsername(nombre));
         return Jwts.builder()
                 .setSubject(credentials.getUsername())
-                .claim("rol", credentials.getRol())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 60000000))
                 .signWith(keyProvider.obtenerKeyPairUsuario("server").getPrivate())
